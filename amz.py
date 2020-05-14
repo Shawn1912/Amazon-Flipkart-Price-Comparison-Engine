@@ -2,14 +2,12 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 
-products = []
-prices = []
-ratings = []
+data = {"products": [], "prices": [], "ratings": []}
 
 url = "https://www.amazon.in/s?k="
 search_input = input("Enter product name : ").replace(" ", "+")
 
-link = "https://www.amazon.in/s?k=apple+mobile" + search_input + "&ref=nb_sb_noss_2"
+link = url + search_input + "&ref=nb_sb_noss_2"
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36"
 }
@@ -25,25 +23,25 @@ for a in soup.findAll("div", attrs={"class": products_class}):
         name = a.find(
             "span", attrs={"class": "a-size-medium a-color-base a-text-normal"}
         )
-        products.append(name.text[:60])
+        data["products"].append(name.text[:60])
 
         try:
             price = a.find("span", attrs={"class": "a-price-whole"})
             # or a-offscreen for price with rupee symbol
-            prices.append(int(price.text.replace(",", "")))
+            data["prices"].append(int(price.text.replace(",", "")))
         except AttributeError:
-            prices.append("Not available")
+            data["prices"].append("Not available")
 
         try:
             rating = a.find("span", attrs={"class": "a-icon-alt"})
-            ratings.append(rating.text[:3])
+            data["ratings"].append(rating.text[:3])
         except AttributeError:
-            ratings.append("Not available")
+            data["ratings"].append("Not available")
 
     except AttributeError:
         continue
 
 df = pd.DataFrame(
-    {"Product_Name": products, "Price (in Rs)": prices, "Rating (out of 5)": ratings}
+    {"Product": data["products"], "Price": data["prices"], "Rating": data["ratings"],}
 )
 df.to_csv("amz.csv", index=False, encoding="utf-8")

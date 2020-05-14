@@ -1,5 +1,9 @@
 import tkinter as tk
 from tkinter import font as tkfont
+import pandas as pd
+import flip
+
+product = ""
 
 
 class PriceApp(tk.Tk):
@@ -30,7 +34,7 @@ class PriceApp(tk.Tk):
         container.grid_columnconfigure(0, weight=1)
 
         self.frames = {}
-        for F in (EntryScreen, StartPage, PageOne, PageTwo):
+        for F in (EntryScreen, SelectScreen):
             page_name = F.__name__
             frame = F(parent=container, controller=self)
             self.frames[page_name] = frame
@@ -54,21 +58,64 @@ class EntryScreen(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.controller = controller
 
-        prod_name_label = tk.Label(
+        prodNameLabel = tk.Label(
             self, text="Enter Product Name : ", font=controller.title_font
         )
-        prod_name_label.pack()
+        prodNameLabel.pack()
 
-        prod_name_entry = tk.Entry(self, width=20)
-        prod_name_entry.pack()
+        self.userInput = tk.StringVar()
 
-        submit_button = tk.Button(
-            self, text="Check prices", width=12, height=2, command=self.__submit()
+        prodNameEntry = tk.Entry(self, width=20, textvariable=self.userInput)
+        prodNameEntry.pack()
+        prodNameEntry.focus()
+
+        submitButton = tk.Button(
+            self, text="Check prices", width=12, height=2, command=self.__submit,
         )
-        submit_button.pack()
+        # command=lambda: controller.show_frame("SelectScreen"),
+        submitButton.pack()
 
     def __submit(self):
-        pass
+        global product
+        print(product)
+        product = self.userInput.get()
+        print(product)
+        flip.getRequest()
+        self.controller.show_frame("SelectScreen")
+
+
+class SelectScreen(tk.Frame,):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
+
+        flipSelect = tk.Label(
+            self, text="Select Flipkart : ", font=controller.title_font
+        )
+        flipSelect.pack()
+
+        # colnames = ["Product", "Price", "Rating"]
+        # data = pd.read_csv("flip.csv", names=colnames)
+
+        # products = data.Product.tolist()
+        # prices = data.Price.tolist()
+        # ratings = data.Rating.tolist()
+
+        # var = tk.StringVar(self)
+        # var.set(products[0])
+
+        # flipOptions = tk.OptionMenu(self, var, *products)
+        # flipOptions.pack()
+
+        amzSelect = tk.Label(self, text="Select Amazon : ", font=controller.title_font)
+        amzSelect.pack()
+
+        # amzList = [1, 2, 3, 4, 5]
+        # var = tk.StringVar(self)
+        # var.set(amzList[0])
+
+        # amzOptions = tk.OptionMenu(self, var, *amzList)
+        # amzOptions.pack()
 
 
 class StartPage(tk.Frame):
