@@ -7,6 +7,10 @@ import flip
 import amz
 
 product = ""
+flipData = {"products": [], "prices": [], "ratings": []}
+amzData = {"products": ["sample"], "prices": [], "ratings": []}
+# flipData = {}
+# amzData = {}
 
 
 class PriceApp(tk.Tk):
@@ -78,7 +82,7 @@ class EntryScreen(tk.Frame):
         # command=lambda: controller.show_frame("SelectScreen"),
         submitButton.pack()
 
-    def getFlipRequest(self):
+    def __getFlipRequest(self):
         data = {"products": [], "prices": [], "ratings": []}
 
         url = "https://www.flipkart.com/search?q="
@@ -110,13 +114,13 @@ class EntryScreen(tk.Frame):
                         int(price.text.replace("₹", "").replace(",", ""))
                     )
                 except AttributeError:
-                    data["prices"].append("Not available")
+                    data["prices"].append("N.A")
 
                 try:
                     rating = a.find("div", attrs={"class": "hGSR34"})
                     data["ratings"].append(rating.text)
                 except AttributeError:
-                    data["ratings"].append("Not available")
+                    data["ratings"].append("N.A")
 
             except AttributeError:
                 continue
@@ -129,15 +133,17 @@ class EntryScreen(tk.Frame):
             }
         )
         df.to_csv("flip.csv", index=False, encoding="utf-8")
+        return data
 
-    def getAmzRequest(self):
+    def __getAmzRequest(self):
         data = {"products": [], "prices": [], "ratings": []}
 
         url = "https://www.amazon.in/s?k="
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36"
         }
-        products_class = "sg-col-4-of-12 sg-col-8-of-16 sg-col-16-of-24 sg-col-12-of-20 sg-col-24-of-32 sg-col sg-col-28-of-36 sg-col-20-of-28"
+        products_class_rows = "sg-col-4-of-12 sg-col-8-of-16 sg-col-16-of-24 sg-col-12-of-20 sg-col-24-of-32 sg-col sg-col-28-of-36 sg-col-20-of-28"
+        products_class_boxes = "sg-col-4-of-24 sg-col-4-of-12 sg-col-4-of-36 s-result-item s-asin sg-col-4-of-28 sg-col-4-of-16 sg-col sg-col-4-of-20 sg-col-4-of-32"
 
         # search_input = input("Enter product name : ").replace(" ", "+")
         print("Amazon getting userInput...")
@@ -151,29 +157,44 @@ class EntryScreen(tk.Frame):
         content = source.text
         soup = BeautifulSoup(content, "lxml")
 
-        for a in soup.findAll("div", attrs={"class": products_class}):
+        products = soup.findAll("div", attrs={"class": products_class_rows})
 
-            try:
-                name = a.find(
-                    "span", attrs={"class": "a-size-medium a-color-base a-text-normal"}
-                )
-                data["products"].append(name.text[:60])
+        # for i in range(1, len(products) // 4):
+        #     print(products[i])
+        # print(len(products))
+        # print(type(products))
 
+        # print(products[1])
+
+        if len(products) != 1:
+            for prod in products:
                 try:
-                    price = a.find("span", attrs={"class": "a-price-whole"})
-                    # or a-offscreen for price with rupee symbol
-                    data["prices"].append(int(price.text.replace(",", "")))
-                except AttributeError:
-                    data["prices"].append("Not available")
+                    name = prod.find(
+                        "span",
+                        attrs={"class": "a-size-medium a-color-base a-text-normal"},
+                    )
+                    data["products"].append(name.text[:60])
 
-                try:
-                    rating = a.find("span", attrs={"class": "a-icon-alt"})
-                    data["ratings"].append(rating.text[:3])
-                except AttributeError:
-                    data["ratings"].append("Not available")
+                    try:
+                        price = prod.find("span", attrs={"class": "a-price-whole"})
+                        data["prices"].append(int(price.text.replace(",", "")))
+                    except AttributeError:
+                        data["prices"].append("N.A")
 
-            except AttributeError:
-                continue
+                    try:
+                        rating = prod.find("span", attrs={"class": "a-icon-alt"})
+                        data["ratings"].append(rating.text[:3])
+                    except AttributeError:
+                        data["ratings"].append("N.A")
+
+                except AttributeError:
+                    continue
+        else:
+            # products not in row form
+            # add for loop for scraping product boxes
+            data["products"].append("No products available")
+            data["prices"].append("NA")
+            data["ratings"].append("NA")
 
         df = pd.DataFrame(
             {
@@ -184,13 +205,18 @@ class EntryScreen(tk.Frame):
         )
         df.to_csv("amz.csv", index=False, encoding="utf-8")
 
+        return data
+
     def __submit(self):
-        global product
+        global product, flipData, amzData
         product = self.userInput.get()
 
-        self.getFlipRequest()
-        self.getAmzRequest()
+        flipData = self.__getFlipRequest()
+        # print(flipData["products"])
+        amzData = self.__getAmzRequest()
+        # print(amzData["products"])
 
+        # SelectScreen.__showOptions(self=SelectScreen)
         self.controller.show_frame("SelectScreen")
 
 
@@ -204,28 +230,41 @@ class SelectScreen(tk.Frame):
         )
         flipLabel.pack()
 
-        # colnames = ["Product", "Price", "Rating"]
-        # data = pd.read_csv("flip.csv", names=colnames)
+        flipColnames = ["Product", "Price", "Rating"]
+        flipData = pd.read_csv("flip.csv", names=flipColnames)
 
-        # products = data.Product.tolist()
-        # prices = data.Price.tolist()
-        # ratings = data.Rating.tolist()
+        flipProducts = flipData.Product.tolist()
+        flipPrices = flipData.Price.tolist()
+        flipRatings = flipData.Rating.tolist()
 
-        # var = tk.StringVar(self)
-        # var.set(products[0])
+        flipVar = tk.StringVar(self)
+        flipVar.set(flipProducts[1])
 
-        # flipOptions = tk.OptionMenu(self, var, *products)
-        # flipOptions.pack()
+        flipOptions = tk.OptionMenu(self, flipVar, *flipProducts)
+        flipOptions.pack()
 
         amzLabel = tk.Label(self, text="Select Amazon : ", font=controller.title_font)
         amzLabel.pack()
 
-        # amzList = [1, 2, 3, 4, 5]
-        # var = tk.StringVar(self)
-        # var.set(amzList[0])
+        amzColnames = ["Product", "Price", "Rating"]
+        amzData = pd.read_csv("amz.csv", names=amzColnames)
 
-        # amzOptions = tk.OptionMenu(self, var, *amzList)
-        # amzOptions.pack()
+        amzProducts = amzData.Product.tolist()
+        amzPrices = amzData.Price.tolist()
+        amzRatings = amzData.Rating.tolist()
+
+        amzVar = tk.StringVar(self)
+        amzVar.set(amzProducts[1])
+
+        amzOptions = tk.OptionMenu(self, amzVar, *amzProducts)
+        amzOptions.pack()
+
+    # def __showOptions(self):
+    #     amzVar = tk.StringVar(self)
+    #     amzVar.set(amzData["products"][0])
+
+    #     amzOptions = tk.OptionMenu(self, amzVar, *amzData["products"])
+    #     amzOptions.pack()
 
 
 class StartPage(tk.Frame):

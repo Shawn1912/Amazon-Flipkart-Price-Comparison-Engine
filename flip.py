@@ -16,7 +16,6 @@ def getRequest():
     # search_input = input("Enter product name : ").replace(" ", "+")
     print("getting userInput...")
     search_input = PriceApp.product
-    print(PriceApp.var + 2)
     print("Product is : ", PriceApp.product)
 
     link = url + search_input
