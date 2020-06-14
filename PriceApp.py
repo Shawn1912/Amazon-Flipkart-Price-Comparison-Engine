@@ -1,23 +1,23 @@
 import tkinter as tk
 from tkinter import font as tkfont
+import aiohttp
+import asyncio
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
-import flip
-import amz
 
 product = ""
-flipData = {"products": [], "prices": [], "ratings": []}
-amzData = {"products": ["sample"], "prices": [], "ratings": []}
-# flipData = {}
-# amzData = {}
+# flipData = {"products": [], "prices": [], "ratings": []}
+# amzData = {"products": ["sample"], "prices": [], "ratings": []}
+flipData = {}
+amzData = {}
 
 
 class PriceApp(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
         self.title("Price Comparison Engine")
-        masterWin = {"width": 400, "height": 150, "xPos": 600, "yPos": 300}
+        masterWin = {"width": 600, "height": 250, "xPos": 500, "yPos": 250}
         self.geometry(
             "{}x{}+{}+{}".format(
                 masterWin["width"],
@@ -28,9 +28,15 @@ class PriceApp(tk.Tk):
         )
         self.config(bg="white")
 
-        self.title_font = tkfont.Font(
-            family="Helvetica", size=18, weight="bold", slant="italic"
-        )
+        # Bold fonts
+        self.largeBoldFont = tkfont.Font(family="Helvetica", size=15, weight="bold")
+        self.mediumBoldFont = tkfont.Font(family="Helvetica", size=12, weight="bold")
+        self.smallBoldFont = tkfont.Font(family="Helvetica", size=10, weight="bold")
+
+        # Normal fonts
+        self.largeFont = tkfont.Font(family="Helvetica", size=15)
+        self.mediumFont = tkfont.Font(family="Helvetica", size=12)
+        self.smallFont = tkfont.Font(family="Helvetica", size=10)
 
         # the container is where we'll stack a bunch of frames
         # on top of each other, then the one we want visible
@@ -66,21 +72,21 @@ class EntryScreen(tk.Frame):
         self.controller = controller
 
         prodNameLabel = tk.Label(
-            self, text="Enter Product Name : ", font=controller.title_font
+            self, text="Enter Product Name : ", font=controller.largeBoldFont
         )
-        prodNameLabel.pack()
+        prodNameLabel.place(x=10, y=20)
 
         self.userInput = tk.StringVar()
 
         prodNameEntry = tk.Entry(self, width=20, textvariable=self.userInput)
-        prodNameEntry.pack()
+        prodNameEntry.place(x=250, y=25)
         prodNameEntry.focus()
 
         submitButton = tk.Button(
             self, text="Check prices", width=12, height=2, command=self.__submit,
         )
         # command=lambda: controller.show_frame("SelectScreen"),
-        submitButton.pack()
+        submitButton.place(x=150, y=60)
 
     def __getFlipRequest(self):
         data = {"products": [], "prices": [], "ratings": []}
@@ -127,7 +133,7 @@ class EntryScreen(tk.Frame):
 
         df = pd.DataFrame(
             {
-                "Product": data["products"],
+                "Select Product": data["products"],
                 "Price": data["prices"],
                 "Rating": data["ratings"],
             }
@@ -198,7 +204,7 @@ class EntryScreen(tk.Frame):
 
         df = pd.DataFrame(
             {
-                "Product": data["products"],
+                "Select Product": data["products"],
                 "Price": data["prices"],
                 "Rating": data["ratings"],
             }
@@ -225,39 +231,73 @@ class SelectScreen(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.controller = controller
 
-        flipLabel = tk.Label(
-            self, text="Select Flipkart : ", font=controller.title_font
+        """ FLIPKART AREA """
+        # Flipkart product label
+        flipProductLabel = tk.Label(
+            self, text="Product : ", font=controller.mediumBoldFont
         )
-        flipLabel.pack()
+        flipProductLabel.place(x=10, y=20)
 
+        # Reading the saved CSV file
         flipColnames = ["Product", "Price", "Rating"]
         flipData = pd.read_csv("flip.csv", names=flipColnames)
 
+        # Assigning columns from CSV to variables
         flipProducts = flipData.Product.tolist()
         flipPrices = flipData.Price.tolist()
         flipRatings = flipData.Rating.tolist()
 
+        # Variable which points to the selected option in dropdown menu
         flipVar = tk.StringVar(self)
-        flipVar.set(flipProducts[1])
+        # Setting the first element of flipProducts as selected option
+        flipVar.set(flipProducts[0])
 
+        # Products dropdown menu
         flipOptions = tk.OptionMenu(self, flipVar, *flipProducts)
-        flipOptions.pack()
+        flipOptions.place(x=180, y=17)
 
-        amzLabel = tk.Label(self, text="Select Amazon : ", font=controller.title_font)
-        amzLabel.pack()
+        # Price label
+        flipPriceLabel = tk.Label(self, text="Price : ", font=controller.smallBoldFont)
+        flipPriceLabel.place(x=10, y=60)
 
+        # Rating Label
+        flipRatingLabel = tk.Label(
+            self, text="Rating : ", font=controller.smallBoldFont
+        )
+        flipRatingLabel.place(x=10, y=60)
+
+        """ AMAZON AREA """
+        # Amazon product label
+        amzProductLabel = tk.Label(
+            self, text="Select Amazon : ", font=controller.mediumBoldFont
+        )
+        amzProductLabel.place(x=10, y=120)
+
+        # Reading the saved CSV file
         amzColnames = ["Product", "Price", "Rating"]
         amzData = pd.read_csv("amz.csv", names=amzColnames)
 
+        # Assigning columns from CSV to variables
         amzProducts = amzData.Product.tolist()
         amzPrices = amzData.Price.tolist()
         amzRatings = amzData.Rating.tolist()
 
+        # Variable which points to the selected option in dropdown menu
         amzVar = tk.StringVar(self)
-        amzVar.set(amzProducts[1])
+        # Setting the first element of flipProducts as selected option
+        amzVar.set(amzProducts[0])
 
+        # Products dropdown menu
         amzOptions = tk.OptionMenu(self, amzVar, *amzProducts)
-        amzOptions.pack()
+        amzOptions.place(x=180, y=117)
+
+        # Price Label
+        amzPriceLabel = tk.Label(self, text="Price : ", font=controller.smallBoldFont)
+        amzPriceLabel.place(x=10, y=160)
+
+        # Rating Label
+        amzRatingLabel = tk.Label(self, text="Rating : ", font=controller.smallBoldFont)
+        amzRatingLabel.place(x=10, y=60)
 
     # def __showOptions(self):
     #     amzVar = tk.StringVar(self)
@@ -272,7 +312,7 @@ class StartPage(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.controller = controller
         label = tk.Label(
-            self, text="This is the start page", font=controller.title_font
+            self, text="This is the start page", font=controller.largeBoldFont
         )
         label.pack(side="top", fill="x", pady=10)
 
@@ -294,7 +334,7 @@ class PageOne(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
-        label = tk.Label(self, text="This is page 1", font=controller.title_font)
+        label = tk.Label(self, text="This is page 1", font=controller.largeBoldFont)
         label.pack(side="top", fill="x", pady=10)
         button = tk.Button(
             self,
@@ -308,7 +348,7 @@ class PageTwo(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
-        label = tk.Label(self, text="This is page 2", font=controller.title_font)
+        label = tk.Label(self, text="This is page 2", font=controller.largeBoldFont)
         label.pack(side="top", fill="x", pady=10)
         button = tk.Button(
             self,
