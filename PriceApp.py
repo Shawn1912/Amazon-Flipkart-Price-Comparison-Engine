@@ -17,7 +17,7 @@ class PriceApp(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
         self.title("Price Comparison Engine")
-        masterWin = {"width": 600, "height": 250, "xPos": 500, "yPos": 250}
+        masterWin = {"width": 1000, "height": 700, "xPos": 250, "yPos": 50}
         self.geometry(
             "{}x{}+{}+{}".format(
                 masterWin["width"],
@@ -29,6 +29,7 @@ class PriceApp(tk.Tk):
         self.config(bg="white")
 
         # Bold fonts
+        self.titleFont = tkfont.Font(family="Helvetica", size=30, weight="bold")
         self.largeBoldFont = tkfont.Font(family="Helvetica", size=15, weight="bold")
         self.mediumBoldFont = tkfont.Font(family="Helvetica", size=12, weight="bold")
         self.smallBoldFont = tkfont.Font(family="Helvetica", size=10, weight="bold")
@@ -41,7 +42,7 @@ class PriceApp(tk.Tk):
         # the container is where we'll stack a bunch of frames
         # on top of each other, then the one we want visible
         # will be raised above the others
-        container = tk.Frame(self)
+        container = tk.Frame(self, bg="black")
         container.pack(side="top", fill="both", expand=True)
         container.grid_rowconfigure(0, weight=1)
         container.grid_columnconfigure(0, weight=1)
@@ -71,22 +72,68 @@ class EntryScreen(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.controller = controller
 
-        prodNameLabel = tk.Label(
-            self, text="Enter Product Name : ", font=controller.largeBoldFont
+        # frame = tk.Frame(
+        #     self,
+        #     bg="black",
+        #     height=300,
+        #     width=600,
+        #     bd=1,
+        #     relief=tk.SUNKEN,
+        #     borderwidth=5,
+        # )
+        # # frame.pack(fill=tk.X, padx=5, pady=5)
+        # frame.place(x=200, y=200)
+
+        frame = tk.Frame(
+            self,
+            bg="black",
+            height=700,
+            width=1000,
+            bd=1,
+            relief=tk.SUNKEN,
+            borderwidth=5,
         )
-        prodNameLabel.place(x=10, y=20)
+        # frame.pack(fill=tk.X, padx=5, pady=5)
+        frame.place(x=0, y=0)
+
+        prodNameLabel = tk.Label(
+            frame,
+            text="Enter Product Name : ",
+            font=controller.largeBoldFont,
+            bg="black",
+            fg="white",
+        )
+        prodNameLabel.place(x=100, y=100)
 
         self.userInput = tk.StringVar()
 
-        prodNameEntry = tk.Entry(self, width=20, textvariable=self.userInput)
-        prodNameEntry.place(x=250, y=25)
+        prodNameEntry = tk.Entry(frame, width=20, textvariable=self.userInput)
+        prodNameEntry.place(x=340, y=105)
         prodNameEntry.focus()
 
         submitButton = tk.Button(
-            self, text="Check prices", width=12, height=2, command=self.__submit,
+            frame,
+            text="Check prices",
+            width=12,
+            height=2,
+            bg="green",
+            fg="white",
+            command=self.__submit,
         )
         # command=lambda: controller.show_frame("SelectScreen"),
-        submitButton.place(x=150, y=60)
+        # submitButton.place(x=230, y=200)   CENTER POSITION
+        submitButton.place(x=110, y=200)
+
+        cancelButton = tk.Button(
+            frame, text="Exit", width=12, height=2, bg="red", fg="white"
+        )
+        # command=lambda: controller.show_frame("SelectScreen"),
+        cancelButton.place(x=360, y=200)
+        """ 
+        #0099ff blue
+        #ffcc00 yellow
+        #ff0000 red
+        """
 
     def __getFlipRequest(self):
         data = {"products": [], "prices": [], "ratings": []}
@@ -232,9 +279,22 @@ class SelectScreen(tk.Frame):
         self.controller = controller
 
         """ FLIPKART AREA """
+        # Flipkart Frame
+        flip = tk.Frame(
+            self,
+            bg="#ffffb3",
+            height=300,
+            width=400,
+            bd=1,
+            relief=tk.SUNKEN,
+            borderwidth=5,
+        )
+        # flip.pack(fill=tk.X, padx=5, pady=5)
+        flip.place(x=10, y=10)
+
         # Flipkart product label
         flipProductLabel = tk.Label(
-            self, text="Product : ", font=controller.mediumBoldFont
+            flip, text="Product : ", font=controller.mediumBoldFont
         )
         flipProductLabel.place(x=10, y=20)
 
@@ -248,28 +308,62 @@ class SelectScreen(tk.Frame):
         flipRatings = flipData.Rating.tolist()
 
         # Variable which points to the selected option in dropdown menu
-        flipVar = tk.StringVar(self)
+        flipOptionVar = tk.StringVar(flip)
         # Setting the first element of flipProducts as selected option
-        flipVar.set(flipProducts[0])
+        flipOptionVar.set(flipProducts[0])
 
         # Products dropdown menu
-        flipOptions = tk.OptionMenu(self, flipVar, *flipProducts)
-        flipOptions.place(x=180, y=17)
+        """ tk.OptionMenu(master, variable, values) """
+        flipOptions = tk.OptionMenu(flip, flipOptionVar, *flipProducts)
+        flipOptions.place(x=120, y=17)
 
         # Price label
-        flipPriceLabel = tk.Label(self, text="Price : ", font=controller.smallBoldFont)
+        flipPriceLabel = tk.Label(flip, text="Price : ", font=controller.smallBoldFont)
         flipPriceLabel.place(x=10, y=60)
 
         # Rating Label
         flipRatingLabel = tk.Label(
-            self, text="Rating : ", font=controller.smallBoldFont
+            flip, text="Rating : ", font=controller.smallBoldFont
         )
-        flipRatingLabel.place(x=10, y=60)
+        flipRatingLabel.place(x=150, y=60)
+
+        # TODO: Test price and rating fetch
+        def onFlipOptionSelected():
+            # Getting the product selected and its index in the products list
+            selectedProduct = flipOptionVar.get()
+            indexOfSelectedProduct = flipProducts.index(selectedProduct)
+
+            # Getting price from the prices list and setting the label text
+            priceOfSelectedProduct = str(flipPrices[indexOfSelectedProduct])
+            flipPriceLabel.config(text="Price : " + priceOfSelectedProduct)
+
+            # Getting rating from the ratings list and setting the label text
+            ratingOfSelectedProduct = flipRatings[indexOfSelectedProduct]
+            flipRatingLabel.config(text="Rating : " + ratingOfSelectedProduct)
+
+        # Visit page button
+        visitFlipButton = tk.Button(
+            flip, text="Check price and rating", command=onFlipOptionSelected
+        )
+        visitFlipButton.place(x=300, y=57)
 
         """ AMAZON AREA """
+        # Amazon Frame
+        amz = tk.Frame(
+            self,
+            bg="#9fbfdf",
+            height=300,
+            width=900,
+            bd=1,
+            relief=tk.SUNKEN,
+            borderwidth=5,
+        )
+        # flip.pack(fill=tk.X, padx=5, pady=5)
+        amz.place(x=10, y=330)
+
         # Amazon product label
         amzProductLabel = tk.Label(
-            self, text="Select Amazon : ", font=controller.mediumBoldFont
+            amz, text="Product : ", font=controller.mediumBoldFont
         )
         amzProductLabel.place(x=10, y=120)
 
@@ -283,21 +377,41 @@ class SelectScreen(tk.Frame):
         amzRatings = amzData.Rating.tolist()
 
         # Variable which points to the selected option in dropdown menu
-        amzVar = tk.StringVar(self)
+        amzOptionVar = tk.StringVar(amz)
         # Setting the first element of flipProducts as selected option
-        amzVar.set(amzProducts[0])
+        amzOptionVar.set(amzProducts[0])
 
         # Products dropdown menu
-        amzOptions = tk.OptionMenu(self, amzVar, *amzProducts)
-        amzOptions.place(x=180, y=117)
+        amzOptions = tk.OptionMenu(amz, amzOptionVar, *amzProducts)
+        amzOptions.place(x=120, y=117)
 
         # Price Label
-        amzPriceLabel = tk.Label(self, text="Price : ", font=controller.smallBoldFont)
+        amzPriceLabel = tk.Label(amz, text="Price : ", font=controller.smallBoldFont)
         amzPriceLabel.place(x=10, y=160)
 
         # Rating Label
-        amzRatingLabel = tk.Label(self, text="Rating : ", font=controller.smallBoldFont)
-        amzRatingLabel.place(x=10, y=60)
+        amzRatingLabel = tk.Label(amz, text="Rating : ", font=controller.smallBoldFont)
+        amzRatingLabel.place(x=150, y=160)
+
+        # TODO: Test price and rating fetch
+        def onAmzOptionSelected():
+            # Getting the product selected and its index in the products array
+            selectedProduct = amzOptionVar.get()
+            indexOfSelectedProduct = amzProducts.index(selectedProduct)
+
+            # Getting price from the prices list and setting the label text
+            priceOfSelectedProduct = str(amzPrices[indexOfSelectedProduct])
+            amzPriceLabel.config(text="Price : " + priceOfSelectedProduct)
+
+            # Getting rating from the ratings list and setting the label text
+            ratingOfSelectedProduct = amzRatings[indexOfSelectedProduct]
+            amzRatingLabel.config(text="Rating : " + ratingOfSelectedProduct)
+
+        # Visit page button
+        visitAmzButton = tk.Button(
+            amz, text="Check price and rating", command=onAmzOptionSelected
+        )
+        visitAmzButton.place(x=300, y=157)
 
     # def __showOptions(self):
     #     amzVar = tk.StringVar(self)
