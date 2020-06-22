@@ -1,10 +1,12 @@
 import tkinter as tk
 from tkinter import font as tkfont
+from PIL import Image, ImageTk
 import aiohttp
 import asyncio
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
+import webbrowser
 
 product = ""
 # flipData = {"products": [], "prices": [], "ratings": []}
@@ -304,25 +306,60 @@ class SelectScreen(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.controller = controller
 
+        # Black frame
+        frame = tk.Frame(
+            self,
+            bg="#222",
+            height=700,
+            width=1000,
+            bd=1,
+            relief=tk.FLAT,
+            borderwidth=5,
+        )
+        frame.place(x=0, y=0)
+
+        titleLabel = tk.Label(
+            frame,
+            text="CompareYourProduct",
+            font=controller.titleFont,
+            bg="black",
+            fg="white",
+        )
+        titleLabel.place(x=280, y=20)
+
         """ FLIPKART AREA """
         # Flipkart Frame
         flipFrame = tk.Frame(
-            self,
-            bg="#ffffb3",
-            height=300,
-            width=400,
+            frame,
+            # bg="#ffffb3",     light blue
+            bg="#0099ff",  # blue
+            height=250,
+            width=900,
             bd=1,
-            relief=tk.SUNKEN,
+            relief=tk.RIDGE,
             borderwidth=5,
         )
-        # flip.pack(fill=tk.X, padx=5, pady=5)
-        flipFrame.place(x=10, y=10)
+        flipFrame.place(x=50, y=100)
+
+        # Flipkart Results label
+        flipTitleLabel = tk.Label(
+            flipFrame,
+            text="Flipkart Results : ",
+            font=controller.largeBoldFont,
+            bg="black",
+            fg="white",
+        )
+        flipTitleLabel.place(x=20, y=20)
 
         # Flipkart product label
         flipProductLabel = tk.Label(
-            flipFrame, text="Product : ", font=controller.mediumBoldFont
+            flipFrame,
+            text="Product : ",
+            font=controller.mediumBoldFont,
+            bg="black",
+            fg="white",
         )
-        flipProductLabel.place(x=10, y=20)
+        flipProductLabel.place(x=50, y=100)
 
         # Reading the saved CSV file
         flipColnames = ["Product", "Price", "Rating"]
@@ -348,52 +385,104 @@ class SelectScreen(tk.Frame):
 
         # Variable which points to the selected option in dropdown menu
         flipOptionVar = tk.StringVar(flipFrame)
+
         # Monitor flipOptionVar for any changes in write mode and call onFlipOptionSelected
         """ trace(mode, callback) """
         flipOptionVar.trace("w", onFlipOptionSelected)
+
         # Setting the first element of flipProducts as selected option
         flipOptionVar.set(flipProducts[0])
 
         # Products dropdown menu
         """ tk.OptionMenu(master, variable, values) """
         flipOptions = tk.OptionMenu(flipFrame, flipOptionVar, *flipProducts)
-        flipOptions.place(x=120, y=17)
+        flipOptions.place(x=180, y=97)
 
         # Price label
         flipPriceLabel = tk.Label(
-            flipFrame, text="Price : ", font=controller.smallBoldFont
+            flipFrame,
+            text="Price : ",
+            font=controller.mediumBoldFont,
+            bg="black",
+            fg="white",
         )
-        flipPriceLabel.place(x=10, y=60)
+        flipPriceLabel.place(x=50, y=150)
 
         # Rating Label
         flipRatingLabel = tk.Label(
-            flipFrame, text="Rating : ", font=controller.smallBoldFont
+            flipFrame,
+            text="Rating : ",
+            font=controller.mediumBoldFont,
+            bg="black",
+            fg="white",
         )
-        flipRatingLabel.place(x=150, y=60)
+        flipRatingLabel.place(x=300, y=150)
+
+        # Image Processing
+        flipImage = Image.open("./assets/flipkart-trans.png")
+        flipLogo = ImageTk.PhotoImage(flipImage)
+        # small = flipLogo.subsample(3, 3)
+
+        # Opening web page
+        new = 1
+        flipUrl = "https://www.flipkart.com"
+
+        def visitFlip():
+            webbrowser.open(flipUrl, new=new)
+
+        # Flipkart visit Label
+        flipVisitLabel = tk.Label(
+            flipFrame,
+            text="Visit Page : ",
+            font=controller.mediumBoldFont,
+            bg="black",
+            fg="white",
+        )
+        flipVisitLabel.place(x=550, y=70)
 
         # Visit page button
-        visitFlipButton = tk.Button(flipFrame, text="Visit Page")
-        visitFlipButton.place(x=300, y=57)
+        visitFlipButton = tk.Button(
+            flipFrame,
+            font=controller.mediumBoldFont,
+            image=flipLogo,
+            bg="white",
+            command=visitFlip,
+        )
+        visitFlipButton.place(x=550, y=100)
 
         """ AMAZON AREA """
         # Amazon Frame
         amzFrame = tk.Frame(
-            self,
-            bg="#9fbfdf",
-            height=300,
+            frame,
+            # bg="#9fbfdf",  light yellow
+            bg="#ffcc00",
+            height=250,
             width=900,
             bd=1,
-            relief=tk.SUNKEN,
+            relief=tk.RIDGE,
             borderwidth=5,
         )
-        # flip.pack(fill=tk.X, padx=5, pady=5)
-        amzFrame.place(x=10, y=330)
+        amzFrame.place(x=50, y=400)
+
+        # Amazon Results label
+        amzTitleLabel = tk.Label(
+            amzFrame,
+            text="Amazon Results : ",
+            font=controller.largeBoldFont,
+            bg="black",
+            fg="white",
+        )
+        amzTitleLabel.place(x=20, y=20)
 
         # Amazon product label
         amzProductLabel = tk.Label(
-            amzFrame, text="Product : ", font=controller.mediumBoldFont
+            amzFrame,
+            text="Product : ",
+            font=controller.mediumBoldFont,
+            bg="black",
+            fg="white",
         )
-        amzProductLabel.place(x=10, y=120)
+        amzProductLabel.place(x=50, y=100)
 
         # Reading the saved CSV file
         amzColnames = ["Product", "Price", "Rating"]
@@ -419,33 +508,69 @@ class SelectScreen(tk.Frame):
 
         # Variable which points to the selected option in dropdown menu
         amzOptionVar = tk.StringVar(amzFrame)
+
         # Monitor amzOptionVar for any changes in write mode and call onAmzOptionSelected
         """ trace(mode, callback) """
         amzOptionVar.trace("w", onAmzOptionSelected)
+
         # Setting the first element of flipProducts as selected option
         amzOptionVar.set(amzProducts[0])
 
         # Products dropdown menu
         amzOptions = tk.OptionMenu(amzFrame, amzOptionVar, *amzProducts)
-        amzOptions.place(x=120, y=117)
+        amzOptions.place(x=180, y=97)
 
         # Price Label
         amzPriceLabel = tk.Label(
-            amzFrame, text="Price : ", font=controller.smallBoldFont
+            amzFrame,
+            text="Price : ",
+            font=controller.mediumBoldFont,
+            bg="black",
+            fg="white",
         )
-        amzPriceLabel.place(x=10, y=160)
+        amzPriceLabel.place(x=50, y=150)
 
         # Rating Label
         amzRatingLabel = tk.Label(
-            amzFrame, text="Rating : ", font=controller.smallBoldFont
+            amzFrame,
+            text="Rating : ",
+            font=controller.mediumBoldFont,
+            bg="black",
+            fg="white",
         )
-        amzRatingLabel.place(x=150, y=160)
+        amzRatingLabel.place(x=300, y=150)
+
+        # Image Processing
+        amzImage = Image.open("./assets/amazon-trans.png")
+        amzLogo = ImageTk.PhotoImage(amzImage)
+        # small = amzLogo.subsample(3, 3)
+
+        # open web page
+        new = 1
+        amzUrl = "https://www.amazon.in"
+
+        def visitAmz():
+            webbrowser.open(amzUrl, new=new)
+
+        # Amazon Visit Label
+        amzVisitLabel = tk.Label(
+            amzFrame,
+            text="Visit Page : ",
+            font=controller.mediumBoldFont,
+            bg="black",
+            fg="white",
+        )
+        amzVisitLabel.place(x=550, y=70)
 
         # Visit page button
         visitAmzButton = tk.Button(
-            amzFrame, text="Visit Page", command=onAmzOptionSelected
+            amzFrame,
+            font=controller.mediumBoldFont,
+            image=amzLogo,
+            bg="white",
+            command=visitAmz,
         )
-        visitAmzButton.place(x=300, y=157)
+        visitAmzButton.place(x=550, y=100)
 
     # def __showOptions(self):
     #     amzVar = tk.StringVar(self)
