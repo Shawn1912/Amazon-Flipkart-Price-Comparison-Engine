@@ -59,7 +59,7 @@ class PriceApp(tk.Tk):
             frame.grid(row=0, column=0, sticky="nsew")
             # print(page_name)
 
-        self.show_frame("EntryScreen")
+        self.show_frame("SelectScreen")
 
     def show_frame(self, page_name):
         """Show a frame for the given page name"""
@@ -152,8 +152,8 @@ class EntryScreen(tk.Frame):
             bg="red",
             fg="white",
             font=controller.smallBoldFont,
+            command=controller.destroy,
         )
-        # command=lambda: controller.show_frame("SelectScreen"),
         cancelButton.place(x=320, y=300)
         """ 
         #0099ff blue
@@ -306,7 +306,7 @@ class SelectScreen(tk.Frame):
 
         """ FLIPKART AREA """
         # Flipkart Frame
-        flip = tk.Frame(
+        flipFrame = tk.Frame(
             self,
             bg="#ffffb3",
             height=300,
@@ -316,11 +316,11 @@ class SelectScreen(tk.Frame):
             borderwidth=5,
         )
         # flip.pack(fill=tk.X, padx=5, pady=5)
-        flip.place(x=10, y=10)
+        flipFrame.place(x=10, y=10)
 
         # Flipkart product label
         flipProductLabel = tk.Label(
-            flip, text="Product : ", font=controller.mediumBoldFont
+            flipFrame, text="Product : ", font=controller.mediumBoldFont
         )
         flipProductLabel.place(x=10, y=20)
 
@@ -333,28 +333,7 @@ class SelectScreen(tk.Frame):
         flipPrices = flipData.Price.tolist()
         flipRatings = flipData.Rating.tolist()
 
-        # Variable which points to the selected option in dropdown menu
-        flipOptionVar = tk.StringVar(flip)
-        # Setting the first element of flipProducts as selected option
-        flipOptionVar.set(flipProducts[0])
-
-        # Products dropdown menu
-        """ tk.OptionMenu(master, variable, values) """
-        flipOptions = tk.OptionMenu(flip, flipOptionVar, *flipProducts)
-        flipOptions.place(x=120, y=17)
-
-        # Price label
-        flipPriceLabel = tk.Label(flip, text="Price : ", font=controller.smallBoldFont)
-        flipPriceLabel.place(x=10, y=60)
-
-        # Rating Label
-        flipRatingLabel = tk.Label(
-            flip, text="Rating : ", font=controller.smallBoldFont
-        )
-        flipRatingLabel.place(x=150, y=60)
-
-        # TODO: Test price and rating fetch
-        def onFlipOptionSelected():
+        def onFlipOptionSelected(*args):
             # Getting the product selected and its index in the products list
             selectedProduct = flipOptionVar.get()
             indexOfSelectedProduct = flipProducts.index(selectedProduct)
@@ -367,15 +346,38 @@ class SelectScreen(tk.Frame):
             ratingOfSelectedProduct = flipRatings[indexOfSelectedProduct]
             flipRatingLabel.config(text="Rating : " + ratingOfSelectedProduct)
 
-        # Visit page button
-        visitFlipButton = tk.Button(
-            flip, text="Check price and rating", command=onFlipOptionSelected
+        # Variable which points to the selected option in dropdown menu
+        flipOptionVar = tk.StringVar(flipFrame)
+        # Monitor flipOptionVar for any changes in write mode and call onFlipOptionSelected
+        """ trace(mode, callback) """
+        flipOptionVar.trace("w", onFlipOptionSelected)
+        # Setting the first element of flipProducts as selected option
+        flipOptionVar.set(flipProducts[0])
+
+        # Products dropdown menu
+        """ tk.OptionMenu(master, variable, values) """
+        flipOptions = tk.OptionMenu(flipFrame, flipOptionVar, *flipProducts)
+        flipOptions.place(x=120, y=17)
+
+        # Price label
+        flipPriceLabel = tk.Label(
+            flipFrame, text="Price : ", font=controller.smallBoldFont
         )
+        flipPriceLabel.place(x=10, y=60)
+
+        # Rating Label
+        flipRatingLabel = tk.Label(
+            flipFrame, text="Rating : ", font=controller.smallBoldFont
+        )
+        flipRatingLabel.place(x=150, y=60)
+
+        # Visit page button
+        visitFlipButton = tk.Button(flipFrame, text="Visit Page")
         visitFlipButton.place(x=300, y=57)
 
         """ AMAZON AREA """
         # Amazon Frame
-        amz = tk.Frame(
+        amzFrame = tk.Frame(
             self,
             bg="#9fbfdf",
             height=300,
@@ -385,11 +387,11 @@ class SelectScreen(tk.Frame):
             borderwidth=5,
         )
         # flip.pack(fill=tk.X, padx=5, pady=5)
-        amz.place(x=10, y=330)
+        amzFrame.place(x=10, y=330)
 
         # Amazon product label
         amzProductLabel = tk.Label(
-            amz, text="Product : ", font=controller.mediumBoldFont
+            amzFrame, text="Product : ", font=controller.mediumBoldFont
         )
         amzProductLabel.place(x=10, y=120)
 
@@ -402,25 +404,7 @@ class SelectScreen(tk.Frame):
         amzPrices = amzData.Price.tolist()
         amzRatings = amzData.Rating.tolist()
 
-        # Variable which points to the selected option in dropdown menu
-        amzOptionVar = tk.StringVar(amz)
-        # Setting the first element of flipProducts as selected option
-        amzOptionVar.set(amzProducts[0])
-
-        # Products dropdown menu
-        amzOptions = tk.OptionMenu(amz, amzOptionVar, *amzProducts)
-        amzOptions.place(x=120, y=117)
-
-        # Price Label
-        amzPriceLabel = tk.Label(amz, text="Price : ", font=controller.smallBoldFont)
-        amzPriceLabel.place(x=10, y=160)
-
-        # Rating Label
-        amzRatingLabel = tk.Label(amz, text="Rating : ", font=controller.smallBoldFont)
-        amzRatingLabel.place(x=150, y=160)
-
-        # TODO: Test price and rating fetch
-        def onAmzOptionSelected():
+        def onAmzOptionSelected(*args):
             # Getting the product selected and its index in the products array
             selectedProduct = amzOptionVar.get()
             indexOfSelectedProduct = amzProducts.index(selectedProduct)
@@ -433,9 +417,33 @@ class SelectScreen(tk.Frame):
             ratingOfSelectedProduct = amzRatings[indexOfSelectedProduct]
             amzRatingLabel.config(text="Rating : " + ratingOfSelectedProduct)
 
+        # Variable which points to the selected option in dropdown menu
+        amzOptionVar = tk.StringVar(amzFrame)
+        # Monitor amzOptionVar for any changes in write mode and call onAmzOptionSelected
+        """ trace(mode, callback) """
+        amzOptionVar.trace("w", onAmzOptionSelected)
+        # Setting the first element of flipProducts as selected option
+        amzOptionVar.set(amzProducts[0])
+
+        # Products dropdown menu
+        amzOptions = tk.OptionMenu(amzFrame, amzOptionVar, *amzProducts)
+        amzOptions.place(x=120, y=117)
+
+        # Price Label
+        amzPriceLabel = tk.Label(
+            amzFrame, text="Price : ", font=controller.smallBoldFont
+        )
+        amzPriceLabel.place(x=10, y=160)
+
+        # Rating Label
+        amzRatingLabel = tk.Label(
+            amzFrame, text="Rating : ", font=controller.smallBoldFont
+        )
+        amzRatingLabel.place(x=150, y=160)
+
         # Visit page button
         visitAmzButton = tk.Button(
-            amz, text="Check price and rating", command=onAmzOptionSelected
+            amzFrame, text="Visit Page", command=onAmzOptionSelected
         )
         visitAmzButton.place(x=300, y=157)
 
