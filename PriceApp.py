@@ -16,7 +16,7 @@ amzData = {}
 class PriceApp(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
-        self.title("Price Comparison Engine")
+        self.title("CompareYourProduct")
         masterWin = {"width": 1000, "height": 700, "xPos": 250, "yPos": 50}
         self.geometry(
             "{}x{}+{}+{}".format(
@@ -72,63 +72,89 @@ class EntryScreen(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.controller = controller
 
-        # frame = tk.Frame(
-        #     self,
-        #     bg="black",
-        #     height=300,
-        #     width=600,
-        #     bd=1,
-        #     relief=tk.SUNKEN,
-        #     borderwidth=5,
-        # )
-        # # frame.pack(fill=tk.X, padx=5, pady=5)
-        # frame.place(x=200, y=200)
-
         frame = tk.Frame(
             self,
             bg="black",
             height=700,
             width=1000,
             bd=1,
-            relief=tk.SUNKEN,
+            relief=tk.FLAT,
             borderwidth=5,
         )
         # frame.pack(fill=tk.X, padx=5, pady=5)
         frame.place(x=0, y=0)
 
-        prodNameLabel = tk.Label(
-            frame,
-            text="Enter Product Name : ",
-            font=controller.largeBoldFont,
-            bg="black",
+        container = tk.Frame(
+            self,
+            bg="#333",
+            height=400,
+            width=500,
+            bd=1,
+            relief=tk.GROOVE,
+            borderwidth=5,
+        )
+        container.place(x=250, y=150)
+
+        titleLabel = tk.Label(
+            container,
+            text="CompareYourProduct",
+            font=controller.titleFont,
+            bg="#333",
             fg="white",
         )
-        prodNameLabel.place(x=100, y=100)
+        titleLabel.place(x=35, y=30)
+
+        titleDescriptionLabel = tk.Label(
+            container,
+            text="A price comparison engine",
+            font=controller.mediumBoldFont,
+            bg="#333",
+            fg="white",
+        )
+        titleDescriptionLabel.place(x=135, y=100)
+
+        enterProdNameLabel = tk.Label(
+            container,
+            text="Enter Product Name : ",
+            font=controller.largeBoldFont,
+            bg="#333",
+            fg="white",
+        )
+        enterProdNameLabel.place(x=25, y=180)
 
         self.userInput = tk.StringVar()
 
-        prodNameEntry = tk.Entry(frame, width=20, textvariable=self.userInput)
-        prodNameEntry.place(x=340, y=105)
+        prodNameEntry = tk.Entry(
+            container, width=25, font=controller.mediumFont, textvariable=self.userInput
+        )
+        prodNameEntry.place(x=245, y=183)
         prodNameEntry.focus()
 
         submitButton = tk.Button(
-            frame,
+            container,
             text="Check prices",
             width=12,
-            height=2,
+            height=1,
             bg="green",
             fg="white",
+            font=controller.smallBoldFont,
             command=self.__submit,
         )
         # command=lambda: controller.show_frame("SelectScreen"),
         # submitButton.place(x=230, y=200)   CENTER POSITION
-        submitButton.place(x=110, y=200)
+        submitButton.place(x=80, y=300)
 
         cancelButton = tk.Button(
-            frame, text="Exit", width=12, height=2, bg="red", fg="white"
+            container,
+            text="Exit",
+            width=12,
+            height=1,
+            bg="red",
+            fg="white",
+            font=controller.smallBoldFont,
         )
         # command=lambda: controller.show_frame("SelectScreen"),
-        cancelButton.place(x=360, y=200)
+        cancelButton.place(x=320, y=300)
         """ 
         #0099ff blue
         #ffcc00 yellow
