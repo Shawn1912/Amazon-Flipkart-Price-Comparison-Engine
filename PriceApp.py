@@ -61,7 +61,7 @@ class PriceApp(tk.Tk):
             frame.grid(row=0, column=0, sticky="nsew")
             # print(page_name)
 
-        self.show_frame("SelectScreen")
+        self.show_frame("EntryScreen")
 
     def show_frame(self, page_name):
         """Show a frame for the given page name"""
@@ -318,6 +318,26 @@ class SelectScreen(tk.Frame):
         )
         frame.place(x=0, y=0)
 
+        # Image Processing
+        backImage = Image.open("./assets/back-button.png")
+        backLogo = ImageTk.PhotoImage(backImage)
+        # small = amzLogo.subsample(3, 3)
+
+        def backButton():
+            # self.controller.show_frame("EntryScreen")
+            self.destroy()
+
+        # Back button
+        backButton = tk.Button(
+            frame,
+            # font=controller.mediumBoldFont,
+            image=backLogo,
+            bg="#222",
+            borderwidth=0,
+            command=backButton,
+        )
+        backButton.place(x=50, y=20)
+
         titleLabel = tk.Label(
             frame,
             text="CompareYourProduct",
@@ -571,13 +591,6 @@ class SelectScreen(tk.Frame):
             command=visitAmz,
         )
         visitAmzButton.place(x=550, y=100)
-
-    # def __showOptions(self):
-    #     amzVar = tk.StringVar(self)
-    #     amzVar.set(amzData["products"][0])
-
-    #     amzOptions = tk.OptionMenu(self, amzVar, *amzData["products"])
-    #     amzOptions.pack()
 
 
 class StartPage(tk.Frame):
