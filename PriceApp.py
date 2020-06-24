@@ -9,8 +9,6 @@ import pandas as pd
 import webbrowser
 
 product = ""
-# flipData = {"products": [], "prices": [], "ratings": []}
-# amzData = {"products": ["sample"], "prices": [], "ratings": []}
 flipData = {}
 amzData = {}
 
@@ -164,7 +162,7 @@ class EntryScreen(tk.Frame):
         """
 
     def __getFlipRequest(self):
-        data = {"products": [], "prices": [], "ratings": []}
+        data = {"products": [], "prices": [], "ratings": [], "url": []}
 
         url = "https://www.flipkart.com/search?q="
         headers = {
@@ -185,6 +183,8 @@ class EntryScreen(tk.Frame):
         soup = BeautifulSoup(content, "lxml")
 
         for a in soup.findAll("a", href=True, attrs={"class": products_class}):
+            data["url"].append("https://flipkart.com" + a["href"])
+
             try:
                 name = a.find("div", attrs={"class": "_3wU53n"})
                 data["products"].append(name.text[:60])
@@ -211,13 +211,14 @@ class EntryScreen(tk.Frame):
                 "Select Product": data["products"],
                 "Price": data["prices"],
                 "Rating": data["ratings"],
+                "Link": data["url"],
             }
         )
         df.to_csv("flip.csv", index=False, encoding="utf-8")
         return data
 
     def __getAmzRequest(self):
-        data = {"products": [], "prices": [], "ratings": []}
+        data = {"products": [], "prices": [], "ratings": [], "url": []}
 
         url = "https://www.amazon.in/s?k="
         headers = {
@@ -268,6 +269,14 @@ class EntryScreen(tk.Frame):
                     except AttributeError:
                         data["ratings"].append("N.A")
 
+                    try:
+                        product_url = prod.find(
+                            "a", attrs={"class": "a-link-normal a-text-normal"}
+                        )
+                        data["url"].append("http://www.amazon.in" + product_url["href"])
+                    except AttributeError:
+                        data["url"].append("N.A")
+
                 except AttributeError:
                     continue
         else:
@@ -276,12 +285,14 @@ class EntryScreen(tk.Frame):
             data["products"].append("No products available")
             data["prices"].append("NA")
             data["ratings"].append("NA")
+            data["url"].append("NA")
 
         df = pd.DataFrame(
             {
                 "Select Product": data["products"],
                 "Price": data["prices"],
                 "Rating": data["ratings"],
+                "Link": data["url"],
             }
         )
         df.to_csv("amz.csv", index=False, encoding="utf-8")
@@ -382,13 +393,16 @@ class SelectScreen(tk.Frame):
         flipProductLabel.place(x=50, y=100)
 
         # Reading the saved CSV file
-        flipColnames = ["Product", "Price", "Rating"]
+        flipColnames = ["Product", "Price", "Rating", "Link"]
         flipData = pd.read_csv("flip.csv", names=flipColnames)
 
         # Assigning columns from CSV to variables
         flipProducts = flipData.Product.tolist()
         flipPrices = flipData.Price.tolist()
         flipRatings = flipData.Rating.tolist()
+        flipLinks = flipData.Link.tolist()
+
+        flipProductLink = "amazon.in"
 
         def onFlipOptionSelected(*args):
             # Getting the product selected and its index in the products list
@@ -402,6 +416,11 @@ class SelectScreen(tk.Frame):
             # Getting rating from the ratings list and setting the label text
             ratingOfSelectedProduct = flipRatings[indexOfSelectedProduct]
             flipRatingLabel.config(text="Rating : " + ratingOfSelectedProduct)
+
+            # Getting link from the links list
+            flipProductLink = str(flipLinks[indexOfSelectedProduct])
+            print(flipProductLink)
+            # flipVisitButton.config(command=visitFlip)
 
         # Variable which points to the selected option in dropdown menu
         flipOptionVar = tk.StringVar(flipFrame)
@@ -445,10 +464,10 @@ class SelectScreen(tk.Frame):
 
         # Opening web page
         new = 1
-        flipUrl = "https://www.flipkart.com"
 
-        def visitFlip():
-            webbrowser.open(flipUrl, new=new)
+        def visitFlip(url):
+            print("Button Pressed")
+            webbrowser.open(url, new=new)
 
         # Flipkart visit Label
         flipVisitLabel = tk.Label(
@@ -461,14 +480,14 @@ class SelectScreen(tk.Frame):
         flipVisitLabel.place(x=550, y=70)
 
         # Visit page button
-        visitFlipButton = tk.Button(
+        flipVisitButton = tk.Button(
             flipFrame,
             font=controller.mediumBoldFont,
             image=flipLogo,
             bg="white",
-            command=visitFlip,
+            command=lambda: visitFlip(flipProductLink),
         )
-        visitFlipButton.place(x=550, y=100)
+        flipVisitButton.place(x=550, y=100)
 
         """ AMAZON AREA """
         # Amazon Frame
@@ -505,13 +524,16 @@ class SelectScreen(tk.Frame):
         amzProductLabel.place(x=50, y=100)
 
         # Reading the saved CSV file
-        amzColnames = ["Product", "Price", "Rating"]
+        amzColnames = ["Product", "Price", "Rating", "Link"]
         amzData = pd.read_csv("amz.csv", names=amzColnames)
 
         # Assigning columns from CSV to variables
         amzProducts = amzData.Product.tolist()
         amzPrices = amzData.Price.tolist()
         amzRatings = amzData.Rating.tolist()
+        amzLinks = amzData.Link.tolist()
+
+        amzProductLink = ""
 
         def onAmzOptionSelected(*args):
             # Getting the product selected and its index in the products array
@@ -525,6 +547,11 @@ class SelectScreen(tk.Frame):
             # Getting rating from the ratings list and setting the label text
             ratingOfSelectedProduct = amzRatings[indexOfSelectedProduct]
             amzRatingLabel.config(text="Rating : " + ratingOfSelectedProduct)
+
+            # Getting link from the links list
+            amzProductLink = str(amzLinks[indexOfSelectedProduct])
+            print(amzProductLink)
+            # amzVisitButton.config(command=visitAmz)
 
         # Variable which points to the selected option in dropdown menu
         amzOptionVar = tk.StringVar(amzFrame)
@@ -567,10 +594,9 @@ class SelectScreen(tk.Frame):
 
         # open web page
         new = 1
-        amzUrl = "https://www.amazon.in"
 
         def visitAmz():
-            webbrowser.open(amzUrl, new=new)
+            webbrowser.open(amzProductLink, new=new)
 
         # Amazon Visit Label
         amzVisitLabel = tk.Label(
