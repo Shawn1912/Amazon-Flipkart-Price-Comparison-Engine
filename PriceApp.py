@@ -122,15 +122,25 @@ class EntryScreen(tk.Frame):
             bg="#333",
             fg="white",
         )
-        enterProdNameLabel.place(x=25, y=180)
+        enterProdNameLabel.place(x=10, y=180)
 
         self.userInput = tk.StringVar()
 
-        prodNameEntry = tk.Entry(
+        self.prodNameEntry = tk.Entry(
             container, width=25, font=controller.mediumFont, textvariable=self.userInput
         )
-        prodNameEntry.place(x=245, y=183)
-        prodNameEntry.focus()
+        self.prodNameEntry.place(x=225, y=183)
+        self.prodNameEntry.focus()
+
+        clearEntryButton = tk.Button(
+            container,
+            text="✕",
+            bg="white",
+            fg="black",
+            font=controller.smallFont,
+            command=self.__clearEntryText,
+        )
+        clearEntryButton.place(x=458, y=180)
 
         submitButton = tk.Button(
             container,
@@ -142,8 +152,6 @@ class EntryScreen(tk.Frame):
             font=controller.smallBoldFont,
             command=self.__submit,
         )
-        # command=lambda: controller.show_frame("SelectScreen"),
-        # submitButton.place(x=230, y=200)   CENTER POSITION
         submitButton.place(x=80, y=300)
 
         cancelButton = tk.Button(
@@ -312,6 +320,9 @@ class EntryScreen(tk.Frame):
 
         # SelectScreen.__showOptions(self=SelectScreen)
         self.controller.show_frame("SelectScreen")
+
+    def __clearEntryText(self):
+        self.prodNameEntry.delete(0, tk.END)
 
 
 class SelectScreen(tk.Frame):
@@ -522,6 +533,16 @@ class SelectScreen(tk.Frame):
         )
         amzProductLabel.place(x=50, y=100)
 
+        # Price Label
+        amzPriceLabel = tk.Label(
+            amzFrame,
+            text="Price : ",
+            font=controller.mediumBoldFont,
+            bg="black",
+            fg="white",
+        )
+        amzPriceLabel.place(x=50, y=150)
+
         # Reading the saved CSV file
         amzColnames = ["Product", "Price", "Rating", "Link"]
         amzData = pd.read_csv("amz.csv", names=amzColnames)
@@ -562,16 +583,6 @@ class SelectScreen(tk.Frame):
         # Products dropdown menu
         amzOptions = tk.OptionMenu(amzFrame, amzOptionVar, *amzProducts)
         amzOptions.place(x=180, y=97)
-
-        # Price Label
-        amzPriceLabel = tk.Label(
-            amzFrame,
-            text="Price : ",
-            font=controller.mediumBoldFont,
-            bg="black",
-            fg="white",
-        )
-        amzPriceLabel.place(x=50, y=150)
 
         # Rating Label
         amzRatingLabel = tk.Label(
