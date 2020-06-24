@@ -11,6 +11,8 @@ import webbrowser
 product = ""
 flipData = {}
 amzData = {}
+amzProductLink = ""
+flipProductLink = ""
 
 
 class PriceApp(tk.Tk):
@@ -392,51 +394,6 @@ class SelectScreen(tk.Frame):
         )
         flipProductLabel.place(x=50, y=100)
 
-        # Reading the saved CSV file
-        flipColnames = ["Product", "Price", "Rating", "Link"]
-        flipData = pd.read_csv("flip.csv", names=flipColnames)
-
-        # Assigning columns from CSV to variables
-        flipProducts = flipData.Product.tolist()
-        flipPrices = flipData.Price.tolist()
-        flipRatings = flipData.Rating.tolist()
-        flipLinks = flipData.Link.tolist()
-
-        flipProductLink = "amazon.in"
-
-        def onFlipOptionSelected(*args):
-            # Getting the product selected and its index in the products list
-            selectedProduct = flipOptionVar.get()
-            indexOfSelectedProduct = flipProducts.index(selectedProduct)
-
-            # Getting price from the prices list and setting the label text
-            priceOfSelectedProduct = str(flipPrices[indexOfSelectedProduct])
-            flipPriceLabel.config(text="Price : " + priceOfSelectedProduct)
-
-            # Getting rating from the ratings list and setting the label text
-            ratingOfSelectedProduct = flipRatings[indexOfSelectedProduct]
-            flipRatingLabel.config(text="Rating : " + ratingOfSelectedProduct)
-
-            # Getting link from the links list
-            flipProductLink = str(flipLinks[indexOfSelectedProduct])
-            print(flipProductLink)
-            # flipVisitButton.config(command=visitFlip)
-
-        # Variable which points to the selected option in dropdown menu
-        flipOptionVar = tk.StringVar(flipFrame)
-
-        # Monitor flipOptionVar for any changes in write mode and call onFlipOptionSelected
-        """ trace(mode, callback) """
-        flipOptionVar.trace("w", onFlipOptionSelected)
-
-        # Setting the first element of flipProducts as selected option
-        flipOptionVar.set(flipProducts[0])
-
-        # Products dropdown menu
-        """ tk.OptionMenu(master, variable, values) """
-        flipOptions = tk.OptionMenu(flipFrame, flipOptionVar, *flipProducts)
-        flipOptions.place(x=180, y=97)
-
         # Price label
         flipPriceLabel = tk.Label(
             flipFrame,
@@ -456,6 +413,48 @@ class SelectScreen(tk.Frame):
             fg="white",
         )
         flipRatingLabel.place(x=300, y=150)
+
+        # Reading the saved CSV file
+        flipColnames = ["Product", "Price", "Rating", "Link"]
+        flipData = pd.read_csv("flip.csv", names=flipColnames)
+
+        # Assigning columns from CSV to variables
+        flipProducts = flipData.Product.tolist()
+        flipPrices = flipData.Price.tolist()
+        flipRatings = flipData.Rating.tolist()
+        flipLinks = flipData.Link.tolist()
+
+        def onFlipOptionSelected(*args):
+            # Getting the product selected and its index in the products list
+            selectedProduct = flipOptionVar.get()
+            indexOfSelectedProduct = flipProducts.index(selectedProduct)
+
+            # Getting price from the prices list and setting the label text
+            priceOfSelectedProduct = str(flipPrices[indexOfSelectedProduct])
+            flipPriceLabel.config(text="Price : " + priceOfSelectedProduct)
+
+            # Getting rating from the ratings list and setting the label text
+            ratingOfSelectedProduct = flipRatings[indexOfSelectedProduct]
+            flipRatingLabel.config(text="Rating : " + ratingOfSelectedProduct)
+
+            # Getting link from the links list
+            global flipProductLink
+            flipProductLink = str(flipLinks[indexOfSelectedProduct])
+
+        # Variable which points to the selected option in dropdown menu
+        flipOptionVar = tk.StringVar(flipFrame)
+
+        # Monitor flipOptionVar for any changes in write mode and call onFlipOptionSelected
+        """ trace(mode, callback) """
+        flipOptionVar.trace("w", onFlipOptionSelected)
+
+        # Setting the first element of flipProducts as selected option
+        flipOptionVar.set(flipProducts[0])
+
+        # Products dropdown menu
+        """ tk.OptionMenu(master, variable, values) """
+        flipOptions = tk.OptionMenu(flipFrame, flipOptionVar, *flipProducts)
+        flipOptions.place(x=180, y=97)
 
         # Image Processing
         flipImage = Image.open("./assets/flipkart-trans.png")
@@ -533,8 +532,6 @@ class SelectScreen(tk.Frame):
         amzRatings = amzData.Rating.tolist()
         amzLinks = amzData.Link.tolist()
 
-        amzProductLink = ""
-
         def onAmzOptionSelected(*args):
             # Getting the product selected and its index in the products array
             selectedProduct = amzOptionVar.get()
@@ -549,9 +546,8 @@ class SelectScreen(tk.Frame):
             amzRatingLabel.config(text="Rating : " + ratingOfSelectedProduct)
 
             # Getting link from the links list
+            global amzProductLink
             amzProductLink = str(amzLinks[indexOfSelectedProduct])
-            print(amzProductLink)
-            # amzVisitButton.config(command=visitAmz)
 
         # Variable which points to the selected option in dropdown menu
         amzOptionVar = tk.StringVar(amzFrame)
